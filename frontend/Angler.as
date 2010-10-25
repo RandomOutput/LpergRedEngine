@@ -17,11 +17,7 @@
 			//set the graphics of the enemy
 			this.setEnemyType("angler");
 			gotoAndStop("angler");
-			this.x = xLoc;
-			this.y = yLoc;
 			this.addEventListener(Event.ENTER_FRAME, updateAngler);
-			moveSpeedX = 2;
-			moveSpeedY = 2;
 		}
 		
 		public function clearUpdateAngler(){
@@ -71,9 +67,6 @@
 			if(this.getHealth() <= 0){
 				clearUpdateAngler();
 			}
-			//move the angler
-			this.y += moveSpeedY;
-			this.x += moveSpeedX;
 			bulletTimer++;
 			//fire on a timer
 			if(bulletTimer >=90){

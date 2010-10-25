@@ -31,18 +31,11 @@
 			moveSpeedX = dx;
 			moveSpeedY = dy;
 			creationType = type;
-			Init();
+			
 		}
 		
 		//in case we need to separate this when spawning
-		public function Init(){
-			this.addEventListener(Event.ENTER_FRAME, moveBullet);
-		}
 		
-		public function removeListeners(){
-			this.removeEventListener(Event.ENTER_FRAME, moveBullet);
-			
-		}
 		
 		
 		/*
@@ -52,7 +45,7 @@
 		*/
 		
 		
-		private function moveBullet(event:Event){
+		public function moveBullet(){
 				this.y += moveSpeedY;
 				this.x += moveSpeedX;
 			/*
@@ -63,19 +56,23 @@
 				this.y += moveSpeedY;
 				this.x += moveSpeedX;
 				
-				if(this.y <= 0){//if the bullet has left the stage
-					this.removeListeners();
+				if(this.y <= 0){//if the bullet has left the stagethis.removeListeners();
 					arrayPosition = Globals.totemBullets.indexOf(this);
 					Globals.totemBullets.splice(arrayPosition,1);
 					this.parent.removeChild(this);
 				}
+				
+				for(var t:int=0;t<Globals.enemies.length;t++) {
+				trace("derp: " + Globals.enemies[t]);
+			}
+				
 				//check for collision between bullets and enemies
 				for(var i:int=0; i < Globals.enemies.length; i++){
+					//trace(Globals.enemies);
 					if(this.hitTestObject(Globals.enemies[i])){//if the bullet has collided with the an enemy
 						if(Globals.theStage.contains(this) && Globals.theStage.contains(Globals.enemies[i])){
 							//remove the bullet
 							arrayPosition = Globals.totemBullets.indexOf(this);
-							this.removeListeners();
 							Globals.totemBullets.splice(arrayPosition,1);
 							this.parent.removeChild(this);
 							//enemy takes damage
@@ -109,7 +106,6 @@
 				}
 				
 				if(this.y <= 0){//if the bullet has left the stage
-					this.removeListeners();
 					arrayPosition = Globals.enemyBullets.indexOf(this);
 					Globals.enemyBullets.splice(arrayPosition,1);
 					this.parent.removeChild(this);
@@ -120,7 +116,6 @@
 						if(Globals.theStage.contains(this) && Globals.theStage.contains(Globals.totems[j])){
 							//remove the bullet
 							arrayPosition = Globals.enemyBullets.indexOf(this);
-							this.removeListeners();
 							Globals.enemyBullets.splice(arrayPosition,1);
 							this.parent.removeChild(this);
 							//enemy takes damage
@@ -139,7 +134,7 @@
 						if(Globals.theStage.contains(this) && Globals.enemies[k] is Angler  && Globals.theStage.contains(Globals.enemies[k])){
 							//remove the bullet
 							arrayPosition = Globals.totemBullets.indexOf(this);
-							this.removeListeners();
+							
 							Globals.enemyBullets.splice(arrayPosition,1);
 							this.parent.removeChild(this);
 							/*
@@ -162,13 +157,13 @@
 					
 					//remove the totem bullet
 				    arrayPosition = l;
-					Globals.totemBullets[l].removeListeners();
+					//Globals.totemBullets[l].removeListeners();
 					Globals.totemBullets[l].parent.removeChild(Globals.totemBullets[l]);
 					Globals.totemBullets.splice(arrayPosition,1);
 					
 					//remove the isopod bullet
 					arrayPosition = Globals.enemyBullets.indexOf(this);
-					this.removeListeners();
+					
 					Globals.enemyBullets.splice(arrayPosition,1);
 					if(Globals.theStage.contains(this)){
 						this.parent.removeChild(this);

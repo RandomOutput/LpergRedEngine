@@ -12,33 +12,19 @@
 	
 	public class Enemy extends MovieClip{
 		public var stageRef;
-		public var moveSpeedY:Number = Math.random()*10 + 10;
-		public var moveSpeedX:Number = Math.random()*20 -10;
 		private var health:Number = 100;
 		private var enemyType:String = "";
 		
 	
 	
 		public function Enemy() {
-			// constructor code
-			//these can probably get pushed into an update loop
-			this.addEventListener(Event.ENTER_FRAME, updateEnemy);
+			
 		}
 		
 		//in case we need to separate this when spawning
 		public function Init(){
 		}
 		
-		public function removeListeners(){
-			this.removeEventListener(Event.ENTER_FRAME, updateEnemy);
-			
-		}
-		
-		private function updateEnemy(event:Event){
-			//has the enemy left the play area
-			exitedScreen();
-			
-		}
 		
 		/*
 		* check to see if a enemy exited the screen
@@ -47,7 +33,7 @@
 		*/
 		private function exitedScreen(){
 			if(this.y >= Globals.screenSizeY || this.y <=0 || this.x >= Globals.screenSizeX || this.x <=0 ){//if the enemy has left the stage
-				this.removeListeners();
+				//this.removeListeners();
 				var arayPosition = Globals.enemies.indexOf(this);
 				Globals.enemies.splice(arayPosition,1);
 				//trace("removing the object");
@@ -80,7 +66,6 @@
 			if(health <= 0){
 				if(Globals.theStage.contains(this)){
 					//trace("killed");
-					this.removeListeners();
 					var arayPosition = Globals.enemies.indexOf(this);
 					Globals.enemies.splice(arayPosition,1);
 					//trace("removing the object");

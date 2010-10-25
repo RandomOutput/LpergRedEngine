@@ -32,7 +32,7 @@ package frontend {
 	
 	public class GameDocClass extends Sprite{
 		
-		private var isIREnabled:Boolean=true;//change to true to enable IR
+		private var isIREnabled:Boolean=false;//change to true to enable IR
 		
 		//non - IR contorls
 		private var moveRight = false;
@@ -67,6 +67,22 @@ package frontend {
 		private var totemStream:totemInputController = new totemInputController();
 		
 		public function GameDocClass() {
+			if(stage == null) {
+				this.addEventListener(Event.ENTER_FRAME, checkForStage);
+			}
+			else {init();}
+		}
+		
+		public function checkForStage(e:Event) {
+			if(stage != null) {
+				this.removeEventListener(Event.ENTER_FRAME, checkForStage);
+				init();
+			}
+		}
+			
+		private function init() {
+			//define the level clip
+			//trace("0: " + (stage.getChildAt(0) as MovieClip));
 			/**
 			 * So that TUIO can see the stage, you'll need to add
 			 * the totemInputController to the stage.  Not the most
@@ -96,6 +112,8 @@ package frontend {
 			Globals.totemDebris = new Array();
 			Globals.gameDocClass = this;
 			
+			this.addEventListener(Event.ENTER_FRAME, updateEnemies);
+			
 			/*
 			* PLEASE only alter the size of the screen in code here.
 			* everything else that uses the screen size will 
@@ -108,9 +126,59 @@ package frontend {
 			spawnTotems();
 			spawnTotems();
 			spawnTotems();
-			testLevel();
-			stage.addEventListener(Event.ENTER_FRAME, spawnEnemy);
-			this.addEventListener(Event.ENTER_FRAME, fireOneBullet);
+			//testLevel();
+			
+		}
+		
+		private function updateEnemies(event:Event):void {
+			//1. clear the enemies array
+			Globals.enemies = new Array();
+			trace("clear enemies");
+			for(var t:int=0;t<Globals.enemies.length;t++) {
+				trace("pre:" + Globals.enemies[t]);
+			}
+			
+			//2. loop through clip children & add to enemy array
+			for(var i:int=0; i<CLIP.numChildren; i++) {
+				trace("push Clip:" + CLIP.getChildAt(i));
+				if(CLIP.getChildAt(i) != null) {
+					Globals.enemies.push(CLIP.getChildAt(i));
+				}
+			}
+			
+			for(var u:int=0;u<Globals.enemies.length;u++) {
+				trace("post:" + Globals.enemies[t]);
+			}
+			
+			//3. everything else
+			//the enemies update Loops
+			for each(var enemy:Enemy in Globals.enemies){
+				if(enemy is Squid){
+					(enemy as Squid).updateEnemy();
+				}
+				if(enemy is Pufferfish){
+					(enemy as Pufferfish).updateEnemy();
+				}
+				if(enemy is Isopod){
+					(enemy as Isopod).updateEnemy();
+				}
+			}
+			//update totem location if using keyboard
+			updateNonIRMovement();
+			//update health info for totems
+			//NOT CURRENTLY WOKRING
+			updateHealthInformation();
+			//fire totem bullets
+			fireOneBullet();
+			
+			//handle all bullets
+			for each(var totemBullet:Bullet in Globals.totemBullets){
+				totemBullet.moveBullet();
+			}
+			for each(var enemyBullet:Bullet in Globals.enemyBullets){
+				enemyBullet.moveBullet();
+			}
+			
 		}
 		
 		/*
@@ -125,51 +193,8 @@ package frontend {
 		}
 		
 		private function spawnEnemy(event:Event){
-			starfishSpawnDelay++;
-			squidSpawnDelay++;
-			anglerSpawnDelay++;
-			pufferSpawnDelay++;
 			
 			//trace("Globals.enemies " + Globals.enemies);
-			if(Globals.enemies.length <= 1){
-				var newEnemyNumber:Number = Math.floor(Math.random()* 4);
-				if(newEnemyNumber == 1){
-					//add a isopod
-					Globals.enemies.push(new Isopod( Math.random()* 1180, (Math.random()* 50) + 50));
-					stage.addChild(Globals.enemies[Globals.enemies.length-1]);
-					Globals.enemies[Globals.enemies.length-1].Init();
-				}
-				if(newEnemyNumber == 2){
-					//add a puffer
-					Globals.enemies.push(new Pufferfish(50 + Math.random()* 1180, Math.random()* 50));
-					stage.addChild(Globals.enemies[Globals.enemies.length-1]);
-					Globals.enemies[Globals.enemies.length-1].Init();
-				}
-				if(newEnemyNumber == 3){
-					//add a squid
-					Globals.enemies.push(new Squid( Math.random()* 1180, (Math.random()* 50) + 50));
-					stage.addChild(Globals.enemies[Globals.enemies.length-1]);
-					Globals.enemies[Globals.enemies.length-1].Init();
-				}
-				if(newEnemyNumber == 4){
-					//add a angler
-					Globals.enemies.push(new Angler( Math.random()* 1180, (Math.random()* 50) + 50));
-					stage.addChild(Globals.enemies[Globals.enemies.length-1]);
-					Globals.enemies[Globals.enemies.length-1].Init();
-				}
-			}
-		}
-		
-		private function testLevel(){
-			//add a angler
-			Globals.enemies.push(new Isopod( Math.random()* 1180, (Math.random()* 50) + 50));
-			stage.addChild(Globals.enemies[Globals.enemies.length-1]);
-			Globals.enemies[Globals.enemies.length-1].Init();
-			
-			//add a puffer
-			Globals.enemies.push(new Pufferfish(50 + Math.random()* 1180, Math.random()* 50));
-			stage.addChild(Globals.enemies[Globals.enemies.length-1]);
-			Globals.enemies[Globals.enemies.length-1].Init();
 		}
 		
 		private function updateNonIRMovement(){
@@ -195,20 +220,9 @@ package frontend {
 		
 		//called from totem to spawn a bullet
 		//probably needs to get pushed back down into totem
-		public function fireOneBullet(event:Event){//eventually dx and dy need to get added in here
-		for each(var enemy:Enemy in Globals.enemies){
-			if(enemy is Squid){
-				(enemy as Squid).updateEnemy();
-			}
-			if(enemy is Pufferfish){
-				(enemy as Pufferfish).updateEnemy();
-			}
-			if(enemy is Isopod){
-				(enemy as Isopod).updateEnemy();
-			}
-		}
-			updateNonIRMovement();
-			updateHealthInformation();
+		public function fireOneBullet(){//eventually dx and dy need to get added in here
+		
+			
 			var factor:Number = 20;
 			
 			//fireEnemyBullet(shot1X + thePoint.x, shot1Y + thePoint.y, shot1X/ 10, shot1Y /10);

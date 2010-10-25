@@ -6,37 +6,19 @@
 	
 	public class Pufferfish extends Enemy{
 		private var bulletTimer:Number=0;
-		private var xPosition:Number = 0;
-		private var yPosition:Number = -1;
 		private var rageDistance:Number=350;//distance at which puffer fish is triggered to fire
 		private var rageDelay:Number = 10;
 		
 		private var degrees:Number = 0;
 		private var factor:Number = 20;
-		private var pointToMoveTo:Point = new Point;
-		private var xSpeedDegrade:Number=1;//slowly reduce speed of travel
-		private var ySpeedDegrade:Number=1;
-		public var newPoint:Point = new Point(500,500);//create new point for squid to track
-		
-		private var xSpeed:Number=3;//speed on x
-		private var ySpeed:Number=3;//speed on y
-		private var xSpeedOld:Number=xSpeed;//speed on x
-		private var ySpeedOld:Number=ySpeed;//speed on y
-		public function Pufferfish(xLoc:Number,yLoc:Number) {
+		private var isRageEnabled:Boolean=false;
+		public function Pufferfish() {
 			setHealth(3000);
 			// constructor code
 			//set the graphics of the enemy
 			this.setEnemyType("pufferfish");
 			gotoAndStop("pufferfish");
-			this.x = xLoc;
-			this.y = yLoc;
-			//this.addEventListener(Event.ENTER_FRAME, updatePuffer);
-			//moveSpeedX = 0;
-			//moveSpeedY = 2;
-		}
-		
-		public function clearUpdatePuffer(){
-			//this.removeEventListener(Event.ENTER_FRAME, updatePuffer);
+			
 		}
 		
 		public function updateEnemy(){
@@ -44,25 +26,16 @@
 			if(getHealth() <= 0){
 				
 			}
-			//move the puffer
-			//this.y += moveSpeedY /2;
-			//this.x += moveSpeedX /2;
-			moveToPoint();
 			bulletTimer++;
 			this.rotation += 1;
 			//fire if other enemies are in range
+			isRageEnabled = false;
 			for(var i:int=0; i < Globals.enemies.length; i++){
-				if(this != Globals.enemies[i] && distance(this,Globals.enemies[i]) > rageDistance){
-					if(this.scaleX >=1.5){
-						this.scaleX -= .5;
-						this.scaleY -= .5;
-					}
-					if(this.scaleX < 1){
-						this.scaleX = 1;
-					}
-				}
 				
-				else if(this != Globals.enemies[i] && distance(this,Globals.enemies[i]) < rageDistance){
+				if(this != Globals.enemies[i] && distance(this,Globals.enemies[i]) < rageDistance){
+					isRageEnabled = true;
+				}
+				if(isRageEnabled){
 					//trace("the puffer is within range of another enemy");
 					if(this.scaleX <=5){
 						this.scaleX += .25;
@@ -105,10 +78,16 @@
 						degrees = this.rotation;
 						bulletTimer = 0;
 					}
-				}else{//if not inside teh rage distance
-					
 				}
-					
+				else if(isRageEnabled == false){
+					if(this.scaleX >=1.5){
+						this.scaleX -= .5;
+						this.scaleY -= .5;
+					}
+					if(this.scaleX < 1){
+						this.scaleX = 1;
+					}
+				}
 			}
 			for(var j:int=0; j < Globals.totems.length; j++){
 				/*
@@ -119,82 +98,6 @@
 					
 					//damage this puffer here
 				}
-			}
-		}
-				private function recalculateMovement():void{//reset speed, point, degrade, etc
-			xSpeed = xSpeedOld;//reset initial speeds
-			ySpeed = ySpeedOld;
-			
-			newPoint.x = this.x + (Math.random()* 1000) - 500;
-			newPoint.y = this.y + (Math.random()* 600) - 300;
-			if(newPoint.x < 50){
-				//trace(" newPoint.x < 50");
-				newPoint.x = (Globals.screenSizeX / 2) + (Math.random()* 600) - 300;
-			}
-			if(newPoint.x > Globals.screenSizeX){
-				//trace(" newPoint.x < Globals.screenSizeX");
-				newPoint.x = (Globals.screenSizeX / 2) + (Math.random()* 600) - 300;
-			}
-			if(newPoint.y < 50){
-				//trace(" newPoint.y < 50");
-				newPoint.y = (Globals.screenSizeY / 2) + (Math.random()* 600) - 300;
-			}
-			if(newPoint.y > Globals.screenSizeY){
-				//trace(" newPoint.y < Globals.screenSizeY");
-				newPoint.y = (Globals.screenSizeY / 2) + (Math.random()* 600) - 300;
-			}
-			
-			
-			xSpeedDegrade = .25;
-			ySpeedDegrade = .25;
-		}
-		
-		private function moveToPoint(){
-			//trace("moveToPoint");
-			
-			this.x += Math.random()* 1 - .5;//random motion if desired
-			this.y += Math.random()*1 - .5;
-			this.x += xSpeedDegrade;//slow down speed after each speed change
-			this.y += ySpeedDegrade;
-			if(xSpeed >= 5.25){//set minimum speeds
-				xSpeed-=.25;
-			}
-			if(ySpeed >= 5.25){
-				ySpeed-=.25;
-			}
-			
-			
-			if(this.x < newPoint.x){//determine which direction to travel
-				this.x += xSpeed;
-			}
-			if(this.x > newPoint.x){
-				this.x -= xSpeed;
-			}
-			if(this.y > newPoint.y){
-				this.y -= ySpeed;
-			}
-			if(this.y < newPoint.y){
-				this.y += ySpeed;
-			}
-			
-			xSpeedDegrade -=.25;//reduce speed
-			ySpeedDegrade -=.25;
-			if(xSpeedDegrade <=0){//set minimum speed degradation
-				xSpeedDegrade = 0;
-			}
-			if(ySpeedDegrade <=0){
-				ySpeedDegrade = 0;
-			}
-			
-			//if we collided with the borders
-			if(this.x <=50 || this.x > Globals.screenSizeX || this.y < 50 || this.y > Globals.screenSizeY){
-				recalculateMovement();
-			}
-			
-			
-			//if we reached the point
-			if(Math.abs(this.x-newPoint.x) <=10 && Math.abs(this.y-newPoint.y) <=10){
-				recalculateMovement();
 			}
 		}
 	}
